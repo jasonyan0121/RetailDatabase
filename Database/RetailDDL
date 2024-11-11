@@ -1,0 +1,119 @@
+DROP DATABASE IF EXISTS Retaildb;
+CREATE DATABASE Retaildb;
+USE Retaildb;
+
+drop table if exists User;
+create table User(
+	uid INTEGER(11) UNSIGNED NOT NULL auto_increment,
+    email VARCHAR(40) UNIQUE NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    phone VARCHAR(15),
+    
+    PRIMARY KEY(uid)
+);
+
+drop table if exists Member;
+create table Members(
+	uid INTEGER(11) UNSIGNED NOT NULL,
+    email VARCHAR(40) UNIQUE NOT NULL,
+    password VARCHAR(40) not null,
+    foreign key(uid) references User(uid) on delete cascade,
+    foreign key(email) references User(email) on delete cascade,
+    primary key(email)
+);
+
+drop table if exists Addresses;
+ create table Addresses(
+	address_id INT(11),
+    address_line1 VARCHAR(40),
+    address_line2 VARCHAR(40),
+    uid INT(11) unsigned,
+    city VARCHAR(20),
+    state VARCHAR(20),
+    zip INT(5),
+    country VARCHAR(20),
+    add_type ENUM('T1', 'T2', 'T3'),
+    primary key(address_id),
+    foreign key(uid) references User(uid) on delete cascade
+    );
+
+drop table if exists Payment;
+create table Payment(
+	pay_id INT(11) not null auto_increment,
+    card_num integer(16) not null,
+    card_type ENUM('credit', 'debit', 'giftcard') not null,
+    uid INT(11) unsigned not null,
+    primary key(pay_id),
+    foreign key(uid) references User(uid) on delete cascade
+    );
+    
+drop table if exists Guest;
+create table Guest (
+    uid INT(11) unsigned NOT NULL,
+    card_num integer(16),
+    Address varchar(100),
+    foreign key (uid) references User(uid) on delete cascade,
+    primary key (uid)
+);
+
+drop table if exists Products;
+create table Products(
+	pid INT(11) not null auto_increment,
+    stock INT(10) unsigned,
+    price INT(10) unsigned,
+    category VARCHAR(20),
+    img_path VARCHAR(100),
+    p_description VARCHAR(1000),
+    p_name VARCHAR(40) not null,
+    primary key(pid)
+);
+
+drop table if exists Cart;
+create table Cart(
+	cid INT(11) not null auto_increment,
+    uid INT(11) unsigned not null,
+    primary key(cid),
+    foreign key(uid) references User(uid) on delete cascade
+);
+
+drop table if exists AddedTo;
+create table AddedTo(
+	pid INT(11) not null,
+    cid INT(11) not null,
+    primary key(pid, cid),
+    foreign key(pid) references Products(pid) on delete cascade,
+    foreign key(cid) references Cart(cid) on delete cascade
+);
+
+drop table if exists Orders;
+create table Orders(
+	oid INT(11) not null auto_increment,
+    o_date DATE,
+    o_time TIME,
+    uid INT(11) unsigned not null,
+    o_addr varchar(100) not null,
+    card_num bigint not null,
+    foreign key(uid) references User(uid) on delete cascade,
+    primary key (oid)
+);
+
+drop table if exists Contain;
+create table Contain(
+	oid INT(11),
+    pid INT(11),
+    primary key (oid, pid),
+    foreign key(pid) references Products(pid) on delete cascade,
+    foreign key(oid) references Orders(oid) on delete cascade
+    );
+
+-- NiceToHave?
+drop table if exists Transactions; 
+create table Transactions(
+	tid INT(11),
+    pay_id INT(11),
+    oid INT(11),
+    amount INT(12),
+    foreign key(pay_id) references Payment(pay_id),
+    foreign key(oid) references Orders(oid),
+    primary key(tid)
+    );
